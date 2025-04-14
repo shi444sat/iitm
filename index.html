@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subject Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+   :root {
+  --primary: #6366f1;
+  --background: #f8fafc;
+  --card-bg: #1e293b;
+  --text: #f1f5f9;
+  --shadow: 0 4px 12px rgba(0,0,0,0.05);
+  --border-radius: 12px;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  background: #0f172a;
+  color: var(--text);
+  margin: 0;
+  transition: background 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body.dark-mode {
+  --background: #0f172a;
+  --card-bg: #1e293b;
+  --text: #f1f5f9;
+}
+
+header {
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+footer {
+  background: var(--card-bg);
+  color: var(--text);
+  padding: 1rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  margin-top: auto;
+}
+
+
+    .toggle-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: opacity 0.2s;
+    }
+
+    .toggle-btn:hover {
+      opacity: 0.9;
+    }
+
+    .main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+    .week-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .week-tab {
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius);
+      background: var(--card-bg);
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .week-tab:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .week-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: transparent;
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .subject-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .subject-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .subject-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .subject-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .week-indicator {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    .image-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      margin-top: auto;
+    }
+
+    .image-container {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      padding-top: 100%;
+      background: var(--background);
+      cursor: pointer;
+    }
+
+    .image-container img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+      transform: scale(1.05);
+    }
+
+    .no-images {
+      text-align: center;
+      color: #64748b;
+      padding: 1rem 0;
+      font-style: italic;
+    }
+
+    .skeleton-loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        rgba(0, 0, 0, 0) 0, 
+        rgba(0, 0, 0, 0.05) 50%, 
+        rgba(0, 0, 0, 0) 100%
+      );
+      animation: skeleton-loading 1.5s infinite;
+    }
+
+    .gallery-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      cursor: pointer;
+    }
+
+    .gallery-content {
+      position: relative;
+      max-width: 90vw;
+      max-height: 90vh;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+    }
+
+    .gallery-image {
+      max-width: 80vw;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: var(--border-radius);
+      transition: opacity 0.3s ease;
+    }
+
+    .gallery-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      padding: 1rem;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .gallery-nav:hover {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .gallery-prev {
+      left: 2rem;
+    }
+
+    .gallery-next {
+      right: 2rem;
+    }
+
+    .gallery-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .image-counter {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+    }
+
+    .fullscreen-icon {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 4px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .image-container:hover .fullscreen-icon {
+      display: block;
+    }
+
+    .back-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+    }
+
+    @keyframes skeleton-loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+      }
+      
+      .subject-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ASSIGNMENT</h1>
+     <!-- <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>  -->
+  </header>
+  <main class="main-content">
+    <div id="subjectView">
+      <div class="subject-header">
+        <h2>Select Subject</h2>
+      </div>
+      <div class="subject-grid" id="subjectGrid"></div>
+    </div>
+    
+    <div id="weekView" style="display: none;">
+      <div class="subject-header">
+        <button class="back-button" onclick="showSubjectView()">← Back to Subjects</button>
+        <h2 id="selectedSubjectTitle"></h2>
+      </div>
+      <div class="week-tabs" id="weekTabs"></div>
+      <div class="subject-grid" id="contentGrid"></div>
+    </div>
+  </main>
+  <footer>
+    Made with ❤️ in India
+  </footer>
+
+  <div class="gallery-overlay" id="galleryOverlay">
+    <div class="gallery-content">
+      <button class="gallery-close" onclick="closeGallery()">&times;</button>
+      <button class="gallery-nav gallery-prev" onclick="changeImage(-1)">❮</button>
+      <img class="gallery-image" id="galleryImage" alt="Gallery view">
+      <button class="gallery-nav gallery-next" onclick="changeImage(1)">❯</button>
+      <div class="image-counter" id="imageCounter"></div>
+    </div>
+  </div>
+
+  <script>
+    const GITHUB_TOKEN = "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";
+    const USERNAME = "shi444sat";
+    const REPO_NAME = "iitm";
+    const BRANCH = "main";
+    const BASE_PATH = "content/";
+
+    let currentSubject = null;
+    let currentGalleryImages = [];
+    let currentImageIndex = 0;
+
+    const subjects = [
+      { name: "Mathematics for Data Science I", path: "math1" },
+      { name: "Statistics for Data Science I", path: "stat1" },
+      { name: "Computational Thinking", path: "ct" },
+      { name: "English I", path: "eng1" }
+    ];
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    async function initialize() {
+      await loadSubjects();
+    }
+
+    async function loadSubjects() {
+      const subjectGrid = document.getElementById('subjectGrid');
+      subjectGrid.innerHTML = '';
+
+      subjects.forEach(subject => {
+        const card = document.createElement('div');
+        card.className = 'subject-card';
+        card.innerHTML = `
+          <h3>${subject.name}</h3>
+          <div class="week-indicator">Click to view weeks</div>
+        `;
+        card.addEventListener('click', () => showWeekView(subject));
+        subjectGrid.appendChild(card);
+      });
+    }
+
+    async function showWeekView(subject) {
+      currentSubject = subject;
+      document.getElementById('subjectView').style.display = 'none';
+      document.getElementById('weekView').style.display = 'block';
+      document.getElementById('selectedSubjectTitle').textContent = subject.name;
+
+      const weekTabs = document.getElementById('weekTabs');
+      weekTabs.innerHTML = '';
+      
+      try {
+        const weeks = await fetchWeeks(subject.path);
+        weeks.forEach(week => {
+          const tab = document.createElement('button');
+          tab.className = 'week-tab';
+          tab.textContent = `Week ${week}`;
+          tab.onclick = () => loadSubjectContent(subject.path, week);
+          weekTabs.appendChild(tab);
+        });
+        
+        if(weeks.length > 0) weekTabs.firstChild.click();
+      } catch (error) {
+        console.error('Error loading weeks:', error);
+        weekTabs.innerHTML = '<p>No weeks available</p>';
+      }
+    }
+
+    async function fetchWeeks(subjectPath) {
+      const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${BASE_PATH}${subjectPath}?ref=${BRANCH}`;
+      const response = await fetch(apiUrl, {
+        headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+      return data
+        .filter(item => item.type === 'dir' && item.name.startsWith('week'))
+        .map(item => parseInt(item.name.replace('week', '')))
+        .sort((a, b) => a - b);
+    }
+
+    async function loadSubjectContent(subjectPath, week) {
+      const contentGrid = document.getElementById('contentGrid');
+      contentGrid.innerHTML = '<div class="loader"></div>';
+
+      try {
+        const apiUrl = `https://api.github.com/repos/${USERNAME}/${REPO_NAME}/contents/${BASE_PATH}${subjectPath}/week${week}?ref=${BRANCH}`;
+        const response = await fetch(apiUrl, {
+          headers: { Authorization: `Bearer ${GITHUB_TOKEN}` }
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const imageFiles = data.filter(file => 
+          file.type === 'file' && /\.(png|jpg|jpeg|webp)$/i.test(file.name)
+        );
+
+        displayContent(imageFiles);
+      } catch (error) {
+        console.error('Error loading content:', error);
+        contentGrid.innerHTML = '<div class="no-images">Unable to load content</div>';
+      }
+    }
+
+    function displayContent(files) {
+      const contentGrid = document.getElementById('contentGrid');
+      contentGrid.innerHTML = '';
+
+      if (files.length === 0) {
+        contentGrid.innerHTML = '<div class="no-images">No materials available</div>';
+        return;
+      }
+
+      files.forEach((file, index) => {
+        const container = document.createElement('div');
+        container.className = 'image-container';
+        
+        const skeleton = document.createElement('div');
+        skeleton.className = 'skeleton-loader';
+        container.appendChild(skeleton);
+
+        const img = new Image();
+        img.src = file.download_url;
+        img.onload = () => {
+          container.removeChild(skeleton);
+          container.appendChild(img);
+          
+          const fullscreenIcon = document.createElement('div');
+          fullscreenIcon.className = 'fullscreen-icon';
+          fullscreenIcon.textContent = '↗';
+          container.appendChild(fullscreenIcon);
+          
+          container.addEventListener('click', () => 
+            openGallery(files.map(f => f.download_url), index)
+          );
+        };
+        img.onerror = () => {
+          container.removeChild(skeleton);
+          container.innerHTML = '⚠️ Error loading image';
+        };
+
+        contentGrid.appendChild(container);
+      });
+    }
+
+    function showSubjectView() {
+      document.getElementById('subjectView').style.display = 'block';
+      document.getElementById('weekView').style.display = 'none';
+      currentSubject = null;
+    }
+
+    function openGallery(images, index = 0) {
+      currentGalleryImages = images;
+      currentImageIndex = index;
+      updateGalleryImage();
+      galleryOverlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleKeyboardNavigation);
+    }
+
+    function closeGallery() {
+      galleryOverlay.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      document.removeEventListener('keydown', handleKeyboardNavigation);
+    }
+
+    function updateGalleryImage() {
+      galleryImage.src = currentGalleryImages[currentImageIndex];
+      imageCounter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
+      
+      // Preload adjacent images
+      const nextIndex = (currentImageIndex + 1) % currentGalleryImages.length;
+      const prevIndex = (currentImageIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
+      new Image().src = currentGalleryImages[nextIndex];
+      new Image().src = currentGalleryImages[prevIndex];
+    }
+
+    function changeImage(step) {
+      currentImageIndex = (currentImageIndex + step + currentGalleryImages.length) % currentGalleryImages.length;
+      updateGalleryImage();
+    }
+
+    function handleKeyboardNavigation(event) {
+      if (event.key === 'ArrowLeft') changeImage(-1);
+      if (event.key === 'ArrowRight') changeImage(1);
+      if (event.key === 'Escape') closeGallery();
+    }
+
+    galleryOverlay.addEventListener('click', (e) => {
+      if (e.target === galleryOverlay) closeGallery();
+    });
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', initialize);
+  </script>
+</body>
+</html>
